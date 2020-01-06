@@ -19,6 +19,9 @@ import java.util.Locale;
 public class PrintOrderDataMaker implements PrintDataMaker {
 
 
+    /**
+     * This is test.
+     */
     private String qr;
     private int width;
     private int height;
