@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.koushikdutta.async.ByteBufferList;
 import com.koushikdutta.async.DataEmitter;
@@ -21,6 +22,8 @@ import com.xmwdkk.boothprint.print.PrintUtil;
 import com.xmwdkk.boothprint.print.PrinterMsgType;
 import com.xmwdkk.boothprint.util.ToastUtil;
 
+import org.json.JSONObject;
+
 import de.greenrobot.event.EventBus;
 
 /***
@@ -32,6 +35,8 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
      TextView tv_blueadress;
       boolean mBtEnable = true;
     int PERMISSION_REQUEST_COARSE_LOCATION=2;
+
+    WebSocket mWebSocket;
     /**
      * bluetooth adapter
      */
@@ -46,6 +51,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         findViewById(R.id.button5).setOnClickListener(this);
         findViewById(R.id.button6).setOnClickListener(this);
         findViewById(R.id.button).setOnClickListener(this);
+        findViewById(R.id.button_cs).setOnClickListener(this);
         //6.0以上的手机要地理位置权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
@@ -59,22 +65,38 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         super.onStart();
         BluetoothController.init(this);
 
+
+        //connectWs();
+
+    }
+
+
+    void connectWs() {
         AsyncHttpClient.getDefaultInstance().websocket("http://www.vtuanba.com:80", "my-protocol", new AsyncHttpClient.WebSocketConnectCallback() {
             @Override
-            public void onCompleted(Exception ex, WebSocket webSocket) {
+            public void onCompleted(Exception ex, final WebSocket webSocket) {
+                mWebSocket = webSocket;
                 if (ex != null) {
                     ex.printStackTrace();
                     return;
                 }
-                webSocket.send("message from xiajie");
-                //webSocket.send(new byte[10]);
+
+
+
                 webSocket.setStringCallback(new WebSocket.StringCallback() {
                     public void onStringAvailable(String s) {
-                        System.out.println("I got a string: " + s);
-                        Intent intent2 = new Intent(getApplicationContext(), BtService.class);
-                        intent2.setAction(PrintUtil.ACTION_PRINT);
-                        intent2.putExtra("value", s);
-                        startService(intent2);
+                        try {
+                            JSONObject jsondata = new JSONObject(s);
+                            String insertid = jsondata.getString("insertId");
+                            webSocket.send("{\"insertId\":\"" + insertid + "\"}");
+                            Intent intent2 = new Intent(getApplicationContext(), BtService.class);
+                            intent2.setAction(PrintUtil.ACTION_PRINT);
+                            intent2.putExtra("value", s);
+                            startService(intent2);
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 webSocket.setDataCallback(new DataCallback() {
@@ -87,11 +109,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
             }
         });
 
-
-
     }
-
-
 
 
     @Override
@@ -105,6 +123,10 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()){
+            case R.id.button_cs:
+                connectWs();
+                Toast.makeText(this, "接受消息准备完毕", Toast.LENGTH_LONG);
+                break;
             case R.id.button4:
              startActivity(new Intent(MainActivity.this,SearchBluetoothActivity.class));
                 break;
@@ -160,6 +182,17 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     public void onEventMainThread(PrintMsgEvent event) {
         if (event.type == PrinterMsgType.MESSAGE_TOAST) {
             ToastUtil.showToast(MainActivity.this,event.msg);
+        }
+        else if(event.type == PrinterMsgType.MESSAGE_STATE_CHANGE) {
+            if(event.msg.equals("已连接")) {
+                connectWs();
+            }
+            else {
+                if(mWebSocket != null) {
+                    mWebSocket.close();
+                    mWebSocket = null;
+                }
+            }
         }
     }
 

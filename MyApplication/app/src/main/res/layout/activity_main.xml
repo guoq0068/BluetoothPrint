@@ -48,6 +48,14 @@
         android:layout_alignParentStart="true">
 
         <Button
+            android:id="@+id/button_cs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="连接服务器"
+            />
+
+        <Button
             android:id="@+id/button4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

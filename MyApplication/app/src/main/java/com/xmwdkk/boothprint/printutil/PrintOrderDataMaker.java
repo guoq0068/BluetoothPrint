@@ -238,22 +238,11 @@ public class PrintOrderDataMaker implements PrintDataMaker {
     private List<byte[]> constructDataDemoxj(int type, String jsonstr) {
         ArrayList<byte[]> data = new ArrayList<>();
 
-        String[] addrs = new String[]{
-                "4号楼",
-                "9号楼",
-                "乐天玛特"
-        };
-
-        String[] cates = new String[] {
-                "1荤一素",
-                "2荤1素"
-
-        };
 
         try {
             JSONObject jsondata = new JSONObject(jsonstr);
-            String orderaddr = addrs[jsondata.getInt("select_addr") - 1];
-            String cate = cates[jsondata.getInt("select_category") - 1];
+            String orderaddr = jsondata.getString("select_addr");
+            String cate = jsondata.getString("select_category");
             String name = jsondata.getString("select_name");
             int food_num = jsondata.getInt("food_num");
             int rice_num = jsondata.getInt("rice_num");
