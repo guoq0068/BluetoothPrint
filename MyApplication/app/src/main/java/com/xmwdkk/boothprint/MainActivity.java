@@ -9,6 +9,11 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import com.koushikdutta.async.ByteBufferList;
+import com.koushikdutta.async.DataEmitter;
+import com.koushikdutta.async.callback.DataCallback;
+import com.koushikdutta.async.http.AsyncHttpClient;
+import com.koushikdutta.async.http.WebSocket;
 import com.xmwdkk.boothprint.base.AppInfo;
 import com.xmwdkk.boothprint.bt.BluetoothActivity;
 import com.xmwdkk.boothprint.print.PrintMsgEvent;
@@ -53,6 +58,37 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
         BluetoothController.init(this);
+
+        AsyncHttpClient.getDefaultInstance().websocket("http://www.vtuanba.com:80", "my-protocol", new AsyncHttpClient.WebSocketConnectCallback() {
+            @Override
+            public void onCompleted(Exception ex, WebSocket webSocket) {
+                if (ex != null) {
+                    ex.printStackTrace();
+                    return;
+                }
+                webSocket.send("message from xiajie");
+                //webSocket.send(new byte[10]);
+                webSocket.setStringCallback(new WebSocket.StringCallback() {
+                    public void onStringAvailable(String s) {
+                        System.out.println("I got a string: " + s);
+                        Intent intent2 = new Intent(getApplicationContext(), BtService.class);
+                        intent2.setAction(PrintUtil.ACTION_PRINT);
+                        intent2.putExtra("value", s);
+                        startService(intent2);
+                    }
+                });
+                webSocket.setDataCallback(new DataCallback() {
+                    public void onDataAvailable(DataEmitter emitter, ByteBufferList byteBufferList) {
+                        System.out.println("I got some bytes!");
+                        // note that this data has been read
+                        byteBufferList.recycle();
+                    }
+                });
+            }
+        });
+
+
+
     }
 
 

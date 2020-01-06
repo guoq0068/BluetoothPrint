@@ -49,6 +49,9 @@ public class BtService extends IntentService {
             printTesttwo(3);
         }else if (intent.getAction().equals(PrintUtil.ACTION_PRINT_BITMAP)) {
             printBitmapTest();
+        } else if(intent.getAction().equals(PrintUtil.ACTION_PRINT)) {
+            String jsondata = intent.getStringExtra("value");
+            printData(jsondata);
         }
 
     }
@@ -117,6 +120,12 @@ public class BtService extends IntentService {
         Log.e("BtService", "image bytes size is :" + bytes.length);
         printBytes.add(GPrinterCommand.print);
         PrintQueue.getQueue(getApplicationContext()).add(bytes);
+    }
+
+    private void printData(String jsondata) {
+        PrintOrderDataMaker printOrderDataMaker = new PrintOrderDataMaker(this,"", PrinterWriter58mm.TYPE_58, PrinterWriter.HEIGHT_PARTING_DEFAULT);
+        ArrayList<byte[]> printData = (ArrayList<byte[]>) printOrderDataMaker.getPrintData(PrinterWriter58mm.TYPE_58, jsondata);
+        PrintQueue.getQueue(getApplicationContext()).add(printData);
     }
 //
 //    private void printPainting() {
