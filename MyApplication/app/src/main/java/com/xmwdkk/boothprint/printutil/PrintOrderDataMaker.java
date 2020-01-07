@@ -1,6 +1,7 @@
 package com.xmwdkk.boothprint.printutil;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.xmwdkk.boothprint.R;
 
@@ -305,6 +306,7 @@ public class PrintOrderDataMaker implements PrintDataMaker {
             data.add(printer.getDataAndClose());
             return data;
         } catch (Exception e) {
+            e.printStackTrace();
             return new ArrayList<>();
         }
     }

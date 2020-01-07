@@ -47,13 +47,6 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
-        <Button
-            android:id="@+id/button_cs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="连接服务器"
-            />
 
         <Button
             android:id="@+id/button4"
@@ -67,9 +60,18 @@
             android:id="@+id/button5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="打印小票"
+            android:text="测试打印机"
             android:layout_gravity="center"
    />
+
+        <Button
+            android:id="@+id/button_cs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="连接数据服务器"
+            />
+
 
         <Button
             android:id="@+id/button6"
@@ -77,6 +79,7 @@
             android:layout_height="wrap_content"
             android:text="打印小票（多张）"
             android:layout_gravity="center"
+            android:visibility="invisible"
         />
         <Button
             android:id="@+id/button"
@@ -84,6 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="打印图片"
+            android:visibility="invisible"
     />
 
 

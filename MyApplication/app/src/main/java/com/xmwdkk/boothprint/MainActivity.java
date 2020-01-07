@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
      * bluetooth adapter
      */
     BluetoothAdapter mAdapter;
+    Button  mCsBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +53,8 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         findViewById(R.id.button5).setOnClickListener(this);
         findViewById(R.id.button6).setOnClickListener(this);
         findViewById(R.id.button).setOnClickListener(this);
-        findViewById(R.id.button_cs).setOnClickListener(this);
+        mCsBtn = findViewById(R.id.button_cs);
+        mCsBtn.setOnClickListener(this);
         //6.0以上的手机要地理位置权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
@@ -65,8 +68,6 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         super.onStart();
         BluetoothController.init(this);
 
-
-        //connectWs();
 
     }
 
@@ -86,6 +87,10 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
                 webSocket.setStringCallback(new WebSocket.StringCallback() {
                     public void onStringAvailable(String s) {
                         try {
+                            if(s != null && s.startsWith("\ufeff")) {
+                                s = s.substring(1);
+                            }
+
                             JSONObject jsondata = new JSONObject(s);
                             String insertid = jsondata.getString("insertId");
                             webSocket.send("{\"insertId\":\"" + insertid + "\"}");
@@ -116,6 +121,7 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
     public void btStatusChanged(Intent intent) {
         super.btStatusChanged(intent);
         BluetoothController.init(this);
+        connectWs();
     }
 
 
@@ -185,7 +191,8 @@ public class MainActivity extends BluetoothActivity implements View.OnClickListe
         }
         else if(event.type == PrinterMsgType.MESSAGE_STATE_CHANGE) {
             if(event.msg.equals("已连接")) {
-                connectWs();
+                mCsBtn.setEnabled(true);
+                //connectWs();
             }
             else {
                 if(mWebSocket != null) {
